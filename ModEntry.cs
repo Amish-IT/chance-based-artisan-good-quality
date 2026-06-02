@@ -1,3 +1,4 @@
+using System.Reflection;
 using GenericModConfigMenu;
 using HarmonyLib;
 using StardewModdingAPI;
@@ -24,19 +25,23 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 			Config.Init();
 			
 			helper.Events.GameLoop.GameLaunched += (object? sender, GameLaunchedEventArgs args) => {
-				var temp = helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-				if(temp != null) { // if GMCM installed
-					IGenericModConfigMenuApi configMenu = temp as IGenericModConfigMenuApi;
+				IGenericModConfigMenuApi? configMenu = helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+				if(configMenu != null) { // if GMCM installed
 					configMenu.Register(ModManifest, () => { Config = new ModConfig(); }, () => { Helper.WriteConfig<ModConfig>(Config); });
 					Config.BuildGenericConfigMenu(ModManifest, configMenu);
 					configMenu.OnFieldChanged(ModManifest, ModConfig.OnFieldChanged);
 				}
+				
+				MillPatches.Init(Monitor);
+				ObjectPatches.Init(Monitor);
 			};
 			
-			// hook-in harmony patch:
-			ObjectPatches.Init(Monitor);
-			new Harmony(ModManifest.UniqueID).Patch(AccessTools.Method(typeof(StardewValley.MachineDataUtility), nameof(StardewValley.MachineDataUtility.GetOutputItem)),
+			Harmony harmony = new Harmony(ModManifest.UniqueID);
+			harmony.Patch(AccessTools.Method(typeof(StardewValley.MachineDataUtility), nameof(StardewValley.MachineDataUtility.GetOutputItem)),
 					null, new HarmonyMethod(typeof(ObjectPatches), nameof(ObjectPatches.GetOutputItemPostfix)));
+			harmony.Patch(AccessTools.Method(typeof(StardewValley.Buildings.Building), nameof(StardewValley.Buildings.Building.CheckItemConversionRule)),
+					new HarmonyMethod(typeof(MillPatches), nameof(MillPatches.CheckItemConversionRulePrefix)),
+					new HarmonyMethod(typeof(MillPatches), nameof(MillPatches.CheckItemConversionRulePostfix)));
 		}
 	}
 }

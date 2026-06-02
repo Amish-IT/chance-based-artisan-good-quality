@@ -14,6 +14,7 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 		private const bool CASCADING_DOWNGRADES_DEFAULT = false;
 		private const string SPECIAL_QUALITY_OUTPUT_MODE_DEFAULT = "Duplicate";
 		private const bool REPLACE_LOOM_BEHAVIOR_DEFAULT = false;
+		private const bool APPLY_TO_COOKING_INGREDIENTS_DEFAULT = false;
 		
 		private static readonly string[] SpecialQualityOutputModes;
 		
@@ -27,6 +28,7 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 		public bool CascadingDowngrades { get; set; }
 		public string SpecialQualityOutputMode { get; set; }
 		public bool ReplaceLoomBehavior { get; set; }
+		public bool ApplyToCookingIngredients { get; set; }
 		
 		//
 		// constructors
@@ -42,6 +44,8 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 			ChanceToRetainIridium = CHANCE_TO_RETAIN_IRIDIUM_DEFAULT;
 			CascadingDowngrades = CASCADING_DOWNGRADES_DEFAULT;
 			SpecialQualityOutputMode = SPECIAL_QUALITY_OUTPUT_MODE_DEFAULT;
+			ReplaceLoomBehavior = REPLACE_LOOM_BEHAVIOR_DEFAULT;
+			ApplyToCookingIngredients = APPLY_TO_COOKING_INGREDIENTS_DEFAULT;
 		}
 		
 		//
@@ -100,6 +104,13 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 					() => { return "Replace Loom Behavior"; },
 					() => { return string.Format("If true, replace the vanilla quality-based chance to double Loom products with this mod's chance to inherit quality (default: {0})",
 							REPLACE_LOOM_BEHAVIOR_DEFAULT); }, REPLACE_LOOM_BEHAVIOR_FIELD_ID);
+			// ApplyToCookingIngredients:
+			configMenu.AddBoolOption(manifest,
+					() => { return ApplyToCookingIngredients; },
+					(bool value) => { ApplyToCookingIngredients = value; },
+					() => { return "Apply To Cooking Ingredients"; },
+					() => { return string.Format("If true, allows this mod to affect non-artisan-good cooking ingredients (Oil, Vinegar, Wheat Flour, Sugar, and Rice) (default: {0})",
+							APPLY_TO_COOKING_INGREDIENTS_DEFAULT); });
 		}
 		
 		//

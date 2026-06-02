@@ -4,7 +4,7 @@ using StardewValley.GameData.Machines;
 
 namespace ait.ChanceBasedArtisanGoodQuality {
 	
-	internal static class ObjectPatches {
+	public static class ObjectPatches {
 		//
 		// static data
 		//
@@ -14,6 +14,7 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 		public const string LOOM_ID = "17";
 		
 		private static readonly List<string> BlacklistedMachineIDs;
+		private static readonly List<string> ArtisanIngredientIDs;
 		
 		private static IMonitor Monitor;
 		
@@ -22,8 +23,8 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 		//
 		
 		static ObjectPatches() {
-			BlacklistedMachineIDs = new List<string>();
-			BlacklistedMachineIDs.AddRange(new string[] { CASK_ID, FISH_SMOKER_ID, LOOM_ID });
+			BlacklistedMachineIDs = new List<string>() { CASK_ID, FISH_SMOKER_ID, LOOM_ID };
+			ArtisanIngredientIDs = new List<string> { "247", "419" };
 		}
 		
 		//
@@ -46,6 +47,13 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 			return false;
 		}
 		
+		public static bool TryWhitelistIngredient(string ingredientID) {
+			if(ArtisanIngredientIDs.Contains(ingredientID))
+				return false;
+			ArtisanIngredientIDs.Add(ingredientID);
+			return true;
+		}
+		
 		internal static void Init(IMonitor monitor) {
 			Monitor = monitor;
 		}
@@ -54,7 +62,8 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 			try {
 				if(__result == null)
 					return;
-				if(__result.Category != StardewValley.Object.artisanGoodsCategory)
+				if(!(__result.Category == StardewValley.Object.artisanGoodsCategory ||
+						ModEntry.Config.ApplyToCookingIngredients && ArtisanIngredientIDs.Contains(__result.ItemId)))
 					return;
 				if(inputItem == null)
 					return;
@@ -67,12 +76,12 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 					__result.Stack = 1;
 				
 				if(__result.Quality == 0) {
-					__result.Quality = RollQuality(inputItem.Quality);
+					__result.Quality = RollBaseQuality(inputItem.Quality);
 					return;
 				}
 				
 				int minQuality = __result.Quality;
-				__result.Quality = RollQuality(inputItem.Quality);
+				__result.Quality = RollBaseQuality(inputItem.Quality);
 				switch(ModEntry.Config.SpecialQualityOutputMode) {
 					case "Duplicate":
 						__result.Stack++;
@@ -96,7 +105,7 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 			}
 		}
 		
-		private static int RollQuality(int inputQuality) {
+		internal static int RollBaseQuality(int inputQuality) {
 			if(inputQuality == StardewValley.Object.bestQuality)
 				if(Random.Shared.Next(0, 100) < ModEntry.Config.ChanceToRetainIridium)
 					return StardewValley.Object.bestQuality;
