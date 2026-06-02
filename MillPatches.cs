@@ -97,7 +97,6 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 					int outputToRemove = 0;
 					foreach(int i in iq.Counts)
 						outputToRemove += i;
-					Monitor.Log(StardewValley.Game1.objectData[iq.ItemID].DisplayName + " processed: " + outputToRemove, LogLevel.Info); // TODO: remove
 					outputToRemove *= MillRecipes[iq.ItemID][outputIndex].OutputCount;
 					foreach(Item i in iq.Mill.buildingChests[1].Items)
 						if(i == null)
@@ -122,13 +121,11 @@ namespace ait.ChanceBasedArtisanGoodQuality {
 								outputQualities[outputIndex,ObjectPatches.RollBaseQuality(qualityIndex)]++;
 				
 				// add output items to chest:
-				for(int outputIndex = 0; outputIndex < MillRecipes[iq.ItemID].Length; outputIndex++) {
-					Monitor.Log(StardewValley.Game1.objectData[MillRecipes[iq.ItemID][outputIndex].OutputID].DisplayName + " produced: " + outputQualities[outputIndex,0] + "," +outputQualities[outputIndex,1] + "," + outputQualities[outputIndex,2] + "," + outputQualities[outputIndex,4], LogLevel.Info); // TODO: remove
+				for(int outputIndex = 0; outputIndex < MillRecipes[iq.ItemID].Length; outputIndex++)
 					for(int qualityIndex = 0; qualityIndex < outputQualities.Length; qualityIndex++)
 						if(outputQualities[outputIndex,qualityIndex] > 0)
 							iq.Mill.buildingChests[1].addItem(ItemRegistry.Create(MillRecipes[iq.ItemID][outputIndex].OutputID,
 									outputQualities[outputIndex,qualityIndex], qualityIndex));
-				}
 			}
 		}
 		
